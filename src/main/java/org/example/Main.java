@@ -1,5 +1,7 @@
 package org.example;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -15,8 +17,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class Main {
 
-   private static final int CANTIDAD_FACTURAS = 2;
-
    private static final String CUIT = "";
 
    private static final String CLAVE_FISCAL = "";
@@ -26,10 +26,14 @@ public class Main {
    public static final String DESCRIPCION_FACTURA = "Servicio de consultoria de software";
 
    //MAXIMO MONTO PARA CONSUMIDOR FINAL
-   public static final String MONTO_FACTURA = "95000.00";
+   public static final BigDecimal MONTO_FACTURA = BigDecimal.valueOf(95000.00);
+
+   public static final BigDecimal MONTO_MENSUAL = BigDecimal.valueOf(800000.00);
 
    public static void main(String[] args) {
       WebDriver driver = new ChromeDriver();
+
+      int cantidadFacturas = MONTO_MENSUAL.divide(MONTO_FACTURA, RoundingMode.DOWN).intValue();
       try {
          // Navegar a la página web
          driver.get("https://auth.afip.gov.ar/contribuyente_/login.xhtml?action=SYSTEM&system=admin_mono");
@@ -66,7 +70,7 @@ public class Main {
          WebElement companyNameButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//input[@value='" + RAZON_SOCIAL + "']")));
          companyNameButton.click();
 
-         for (int c = 0; c < CANTIDAD_FACTURAS; c++) {
+         for (int c = 0; c < cantidadFacturas; c++) {
             WebElement generateButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id='btn_gen_cmp']/span[2]")));
             generateButton.click();
 
@@ -119,7 +123,7 @@ public class Main {
             description.sendKeys(DESCRIPCION_FACTURA);
 
             WebElement amount = driver.findElement(By.id("detalle_precio1"));
-            amount.sendKeys(MONTO_FACTURA);
+            amount.sendKeys(MONTO_FACTURA.setScale(2, RoundingMode.DOWN).toString());
 
             WebElement continuarButton4 = wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//*[@id='contenido']/form/input[8]")));
             continuarButton4.click();
